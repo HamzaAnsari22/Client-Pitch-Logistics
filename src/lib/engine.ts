@@ -86,12 +86,12 @@ export function journeyIntro(journey: BookingJourney, f: Fields, lang: Lang): st
   );
 }
 
-export function ackText(detected: string[], corrected: boolean, lang: Lang, variety: number): string {
+export function ackText(detected: string[], corrected: boolean, lang: Lang, variety: number, brief = false): string {
   if (!detected.length) return '';
-  const en = ['Got it:', 'Noted:', 'Perfect:', 'Great:'];
-  const ur = ['Theek hai:', 'Noted:', 'Zabardast:', 'Acha:'];
-  const lead = corrected ? t(lang, 'Updated:', 'Update kar diya:') : t(lang, en[variety % 4], ur[variety % 4]);
-  return `${lead} ${detected.join(', ')}.`;
+  const en = ['Got it', 'Noted', 'Perfect', 'Great'];
+  const ur = ['Theek hai', 'Noted', 'Zabardast', 'Acha'];
+  const lead = corrected ? t(lang, 'Updated', 'Update kar diya') : t(lang, en[variety % 4], ur[variety % 4]);
+  return brief ? `${lead}.` : `${lead}: ${detected.join(', ')}.`;
 }
 
 /** Ask for the next missing field, or move to phone verification / contact capture. */
@@ -348,7 +348,7 @@ function continueJourney(state: ConvState, input: TurnInput, today: Date, tag: E
   const corrected = (Object.keys(patch) as (keyof Fields)[]).some(
     (k) => before[k] !== undefined && JSON.stringify(before[k]) !== JSON.stringify(after[k]),
   );
-  const lead = ackText(detected, corrected, state.lang, Object.keys(after).length);
+  const lead = ackText(detected, corrected, state.lang, Object.keys(after).length, !!input.patch);
   return advance({ ...state, fields: after }, lead, detected, tag, today);
 }
 

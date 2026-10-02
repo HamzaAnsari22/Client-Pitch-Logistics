@@ -6,6 +6,7 @@ import { ackText, advance, demoTurn, isReset, journeyLabel } from './engine';
 import { VEHICLE_LABELS } from './extract';
 import { generateJson, type Content } from './gemini';
 import { infoMessage } from './info';
+import { extractContactName } from './extract';
 import { detectLang, isoDate, parseEmail, parsePhone } from './nlp';
 import { scoreIntents } from './router';
 import { BUSINESS_SLOTS, HOUSEHOLD_SLOTS, missingSlots, promptFor, resolvePendingCities } from './slots';
@@ -192,10 +193,6 @@ export function sanitizeFields(raw: Record<string, unknown> | undefined, today: 
     daily_trips: cleanInt(r.daily_trips, 0, 100000),
     operating_hours: oneOf(r.operating_hours, HOURS),
     pain_points: Array.isArray(r.pain_points) ? r.pain_points.filter((p): p is Pain => PAINS.includes(p as Pain)) : undefined,
-    contact_name: cleanStr(r.contact_name),
-    contact_email: typeof r.contact_email === 'string' ? parseEmail(r.contact_email) ?? undefined : undefined,
-    contact_phone: typeof r.contact_phone === 'string' ? parsePhone(r.contact_phone) ?? undefined : undefined,
-    phone: typeof r.phone === 'string' ? parsePhone(r.phone) ?? undefined : undefined,
   };
   if (typeof r.move_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.move_date) && r.move_date >= isoDate(today)) {
     f.move_date = r.move_date;
@@ -270,6 +267,16 @@ export async function liveTurn(
   const before: Fields = starting ? (state.journey ? {} : state.fields) : state.fields;
   const keys = journey === 'household' ? HOUSEHOLD_KEYS : BUSINESS_KEYS;
   const incoming = pick(sanitizeFields(res.collected_fields, opts.today), keys);
+  // Contact details come from the user's own words, parsed locally, never from model output.
+  const phone = parsePhone(text);
+  if (journey === 'household' && phone) incoming.phone = phone;
+  if (journey === 'business') {
+    const email = parseEmail(text);
+    const name = extractContactName(text);
+    if (phone) incoming.contact_phone = phone;
+    if (email) incoming.contact_email = email;
+    if (name) incoming.contact_name = name;
+  }
   const after = resolvePendingCities({ ...pick(before, keys), ...incoming, ...pick(input.patch ?? {}, keys) });
   state = { ...state, journey, fields: after, stage: 'collect' };
   const detected = [...(starting ? [journeyLabel(journey)] : []), ...changedLabels(journey, before, after)];

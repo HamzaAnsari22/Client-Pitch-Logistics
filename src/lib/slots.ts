@@ -145,7 +145,10 @@ export function promptFor(slot: SlotKey, state: ConvState, today: Date): Prompt 
       };
     }
     case 'home_size': {
-      const sizes: HomeSize[] = ['few-items', 'studio', '1-bed', '2-bed', '3-bed', '4-bed-plus', 'office'];
+      const sizes: HomeSize[] =
+        f.property_type === 'apartment'
+          ? ['studio', '1-bed', '2-bed', '3-bed', '4-bed-plus']
+          : ['few-items', 'studio', '1-bed', '2-bed', '3-bed', '4-bed-plus', 'office'];
       return {
         text:
           f.property_type === 'apartment'

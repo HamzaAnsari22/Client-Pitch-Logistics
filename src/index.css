@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #14233b;
+  --color-navy-700: #22375a;
+  --color-navy-500: #4a5d7d;
+  --color-orange: #c24e0e;
+  --color-orange-600: #a8420b;
+  --color-orange-50: #fbefe6;
+  --color-teal: #0f6e6a;
+  --color-teal-600: #0c5b58;
+  --color-teal-50: #e4f1ef;
+  --color-cream: #f5f3ee;
+  --color-sand: #ebe7dd;
+  --color-line: #e1dccf;
+  --color-muted: #5d6676;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow-soft: 0 1px 2px rgb(20 35 59 / 0.06), 0 8px 24px -12px rgb(20 35 59 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(20 35 59 / 0.06), 0 18px 40px -18px rgb(20 35 59 / 0.35);
+}
+
+html,
+body {
+  background: var(--color-cream);
+  color: var(--color-navy);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes ring {
+  0% {
+    box-shadow: 0 0 0 0 rgb(194 78 14 / 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgb(194 78 14 / 0);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.animate-rise {
+  animation: rise 0.28s ease-out both;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.22s ease-out both;
+}
+
+.typing-dot {
+  animation: blink 1.2s infinite ease-in-out;
+}
+
+.mic-live {
+  animation: ring 1.2s infinite;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-slide-in,
+  .typing-dot,
+  .mic-live {
+    animation: none;
+  }
+}

@@ -3,6 +3,7 @@ import { demoTurn } from '../lib/engine';
 import { parseDate } from '../lib/nlp';
 import { classify, scoreIntents } from '../lib/router';
 import { extractBusiness, extractHousehold } from '../lib/extract';
+import { buildContents, sanitizeFields } from '../lib/live';
 import { initialState, type BotMessage, type ConvState, type TurnInput, type TurnResult } from '../lib/types';
 
 const TODAY = new Date(2026, 9, 2); // Friday 2 Oct 2026
@@ -148,5 +149,28 @@ describe('info journey', () => {
   it('confirms a served city', () => {
     const { last } = run(['Do you operate in Multan?']);
     expect(lastBot(last).text).toMatch(/Yes, we operate in Multan/);
+  });
+});
+
+describe('live mode guards', () => {
+  it('drops malformed or out-of-range model values', () => {
+    const f = sanitizeFields(
+      { home_size: 'mansion', floor: -2, lift: 'no', move_date: '2020-01-01', ac_units: 3, from_city: 'karachi', pain_points: ['tracking', 'vibes'], phone: '03001234567' },
+      TODAY,
+    );
+    expect(f).toEqual({ ac_units: 3, from_city: 'Karachi', pain_points: ['tracking'] });
+  });
+
+  it('builds alternating contents that start with the user', () => {
+    const c = buildContents(
+      [
+        { role: 'model', text: 'hello' },
+        { role: 'user', text: 'a' },
+        { role: 'user', text: 'b' },
+      ],
+      'c',
+    );
+    expect(c.map((x) => x.role)).toEqual(['user']);
+    expect(c[0].parts[0].text).toBe('a\nb\nc');
   });
 });
