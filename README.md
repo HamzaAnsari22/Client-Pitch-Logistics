@@ -84,11 +84,12 @@ npm run preview    # serve the production build
 
 ## Deployment
 
-`.github/workflows/deploy.yml` runs on every push to `main` (and the demo branch): install → test → build → publish `dist/` to the `gh-pages` branch.
+`.github/workflows/deploy.yml` runs on every push to `main` (and the demo branch): install → test → build, then publishes the site in both ways GitHub Pages supports, so it works whichever **Settings → Pages → Source** is selected:
 
-One-time setup, only if Pages isn’t already on: **Settings → Pages → Build and deployment → Source: Deploy from a branch → `gh-pages` / `(root)` → Save.**
+- **Deploy from a branch** → choose `gh-pages` / `(root)`. The workflow pushes the built site to that branch.
+- **GitHub Actions** → the workflow’s `deploy` job publishes it with `actions/deploy-pages`.
 
-The Vite `base` is `/Client-Pitch-Logistics/` (see `vite.config.ts`). Change it if the repository is renamed.
+The Vite `base` is `/Client-Pitch-Logistics/` (see `vite.config.ts`). Change it if the repository is renamed. The URL path is case-sensitive.
 
 ## Project structure
 

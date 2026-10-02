@@ -1,5 +1,9 @@
 name: Deploy to GitHub Pages
 
+# Works with either Pages source setting:
+#  - "Deploy from a branch" (gh-pages / root): served from the gh-pages branch pushed below.
+#  - "GitHub Actions": served by the deploy job via actions/deploy-pages.
+
 on:
   push:
     branches: [main, claude/exciting-gauss-9a8ktf]
@@ -13,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -44,3 +48,24 @@ jobs:
           publish_branch: gh-pages
           force_orphan: true
           commit_message: Deploy ${{ github.sha }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    # Only succeeds when the Pages source is "GitHub Actions"; harmless otherwise.
+    continue-on-error: true
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
